@@ -13,7 +13,6 @@ class Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey stackKey = GlobalKey();
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: Stack(
