@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lab/data/models/band/cell_toplist_model.dart';
+import 'package:flutter_lab/data/models/filter_model.dart';
 import 'package:flutter_lab/domains/band_home_domain.dart';
+import 'package:flutter_lab/screen/filter_list_screen.dart';
 import 'package:flutter_lab/widgets/cell_widget.dart';
 import 'package:flutter_lab/data/models/band/band_model.dart';
 
@@ -54,15 +56,27 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Text(
-                'filter',
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.displayMedium!.color,
-                ),
-              ),
-            ],
+          FutureBuilder(
+            future: bandModel,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      for (var filter in snapshot.data!.filterModel.filterList)
+                        FilterWidget(
+                          title: filter.title,
+                          filterItemList: filter.filterItemList,
+                        ),
+                    ],
+                  ),
+                );
+              } else {
+                return Container();
+              }
+            },
           ),
           const SizedBox(
             height: 15,
@@ -102,8 +116,6 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
       ),
       itemCount: cells.length,
       itemBuilder: (context, index) {
-        print('index = $index');
-
         if (domain.getCellList().isNotEmpty) {
           nextPageThreshold = domain.getCellList().length - 3;
 
@@ -120,6 +132,48 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
           deeplink: "",
         );
       },
+    );
+  }
+}
+
+class FilterWidget extends StatelessWidget {
+  final String title;
+  final List<FilterItemModel> filterItemList;
+
+  const FilterWidget(
+      {super.key, required this.title, required this.filterItemList});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FilterListScreen(
+                filterItemList: filterItemList,
+              ),
+              fullscreenDialog: true,
+              allowSnapshotting: true,
+            ));
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        child: Row(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.displayMedium!.color,
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down_outlined,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
