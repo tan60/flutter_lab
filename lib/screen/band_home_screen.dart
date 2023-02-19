@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lab/data/models/band/cell_toplist_model.dart';
+import 'package:flutter_lab/domains/band_home_domain.dart';
 import 'package:flutter_lab/widgets/cell_widget.dart';
-
-import '../data/models/band/band_model.dart';
-import '../data/repository/remote/api_service.dart';
+import 'package:flutter_lab/data/models/band/band_model.dart';
 
 class BandHomeScreen extends StatefulWidget {
   const BandHomeScreen({super.key});
@@ -13,15 +12,19 @@ class BandHomeScreen extends StatefulWidget {
 }
 
 class _BandHomeScreenState extends State<BandHomeScreen> {
+  BandHomeDomain domain = BandHomeDomain();
   late Future<BandModel> bandModel;
 
   @override
   void initState() {
     super.initState();
-    const String url =
-        "https://apis.wavve.com/es/vod/hotepisodes?uitype=VN500&uirank=12&uiparent=GN51-VN500&uicode=VN500&orderby=viewtime&offset=0&mtype=N&limit=21&genre=all&contenttype=vod&broadcastid=VN500&WeekDay=all&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=mobile&drm=wm&partner=pooq&pooqzone=none&region=kor&service=wavve&targetage=all";
 
-    bandModel = ApiService.getBand(url);
+    bandModel = domain.fetchBands(0);
+  }
+
+  Future<void> fetchBands(int offset) async {
+    await domain.fetchBands(offset);
+    setState(() {});
   }
 
   @override
@@ -58,16 +61,21 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
           FutureBuilder(
             future: bandModel,
             builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.data!.cellTopList != null &&
-                  snapshot.data!.cellTopList!.cellList != null) {
-                List<CellModel> cells = snapshot.data!.cellTopList!.cellList!;
-
+              if (snapshot.hasData) {
                 return Expanded(
-                  child: createGridView(cells),
+                  child: createGridView(domain.getCellList()),
                 );
               } else {
-                return const Text('...');
+                return Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
           ),
@@ -77,6 +85,7 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
   }
 
   GridView createGridView(List<CellModel> cells) {
+    const int nextPageThreshold = 6;
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -84,6 +93,14 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
       ),
       itemCount: cells.length,
       itemBuilder: (context, index) {
+        print('index = $index');
+        if (index == domain.limit - nextPageThreshold) {
+          if (!domain.isLast()) {
+            //fetch more content
+            print('fetch more band :: offset is ${cells.length}');
+            fetchBands(cells.length);
+          }
+        }
         CellModel cell = cells[index];
         return Cell(
           thumbnail: cell.thumbnail,

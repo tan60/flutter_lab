@@ -1,6 +1,6 @@
 class CellTopListModel {
   final List<TitleModel>? titleList;
-  final List<CellModel>? cellList;
+  List<CellModel>? cellList;
 
   CellTopListModel.fromJson(Map<String, dynamic> json)
       : titleList = (json['title_list'] as List)
