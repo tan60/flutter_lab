@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lab/data/models/band/cell_toplist_model.dart';
 import 'package:flutter_lab/data/models/filter_model.dart';
 import 'package:flutter_lab/domains/band_home_domain.dart';
-import 'package:flutter_lab/screen/filter_list_screen.dart';
 import 'package:flutter_lab/widgets/cell_widget.dart';
 import 'package:flutter_lab/data/models/band/band_model.dart';
+import 'package:flutter_lab/widgets/filter_list_widget.dart';
 
 class BandHomeScreen extends StatefulWidget {
   const BandHomeScreen({super.key});
@@ -65,10 +65,13 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      for (var filter in snapshot.data!.filterModel.filterList)
+                      for (var i = 0;
+                          i < snapshot.data!.filterModel.filterList.length;
+                          i++)
                         FilterWidget(
-                          title: filter.title,
-                          filterItemList: filter.filterItemList,
+                          title: domain.getFilterTitle(i) /* filter.title */,
+                          filterItemList: snapshot
+                              .data!.filterModel.filterList[i].filterItemList,
                         ),
                     ],
                   ),
@@ -147,15 +150,16 @@ class FilterWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FilterListScreen(
-                filterItemList: filterItemList,
-              ),
-              fullscreenDialog: true,
-              allowSnapshotting: true,
-            ));
+        showGeneralDialog(
+          barrierDismissible: false,
+          context: context,
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return FilterListWidget(
+              currentTitle: title,
+              filterItemList: filterItemList,
+            );
+          },
+        );
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5.0),

@@ -3,8 +3,8 @@ import 'package:flutter_lab/data/models/band/cell_toplist_model.dart';
 import 'package:flutter_lab/data/repository/base_repository.dart';
 
 class BandHomeDomain {
-  final bandRequestUrl =
-      "https://apis.wavve.com/es/vod/hotepisodes?uitype=VN500&uirank=12&uiparent=GN51-VN500&uicode=VN500&orderby=viewtime&mtype=N&genre=all&contenttype=vod&broadcastid=VN500&WeekDay=all&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=mobile&drm=wm&partner=pooq&pooqzone=none&region=kor&service=wavve&targetage=all&offset=0&limit=21";
+  String bandRequestUrl =
+      "https://apis.wavve.com/es/vod/hotepisodes?uitype=VN500&uirank=12&uiparent=GN51-VN500&uicode=VN500&&channel=all&orderby=viewtime&mtype=N&genre=all&contenttype=vod&broadcastid=VN500&WeekDay=all&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=mobile&drm=wm&partner=pooq&pooqzone=none&region=kor&service=wavve&targetage=all&offset=0&limit=21";
   late BandModel bandModel;
   final int limit = 21;
   final List<CellModel> _cells = [];
@@ -21,9 +21,9 @@ class BandHomeDomain {
     queryParameters['offset'] = '$offset';
     queryParameters['limit'] = '$limit';
 
-    uri = uri.replace(queryParameters: queryParameters);
+    bandRequestUrl = uri.replace(queryParameters: queryParameters).toString();
 
-    bandModel = await BaseReo().fetchBand(uri.toString());
+    bandModel = await BaseReo().fetchBand(bandRequestUrl);
 
     if (bandModel.cellTopList != null &&
         bandModel.cellTopList!.cellList != null) {
@@ -45,5 +45,22 @@ class BandHomeDomain {
 
   bool isLast() {
     return _isLast;
+  }
+
+  String getFilterTitle(int filterListItemIndex) {
+    Uri uri = Uri.parse(bandRequestUrl);
+    Map<String, String> queryParameters = Map.from(uri.queryParameters);
+
+    for (var filterItem in bandModel
+        .filterModel.filterList[filterListItemIndex].filterItemList) {
+      String keyName = filterItem.apiParameters.split('=')[0].substring(1);
+      String keyValue = filterItem.apiParameters.split('=')[1];
+      String currentSetValue = queryParameters[keyName] ?? "";
+      if (currentSetValue == keyValue) {
+        return filterItem.title;
+      }
+    }
+
+    return "";
   }
 }
