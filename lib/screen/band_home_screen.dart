@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lab/data/models/band/cell_toplist_model.dart';
-import 'package:flutter_lab/data/models/filter_model.dart';
 import 'package:flutter_lab/domains/band_home_domain.dart';
-import 'package:flutter_lab/widgets/cell_widget.dart';
+import 'package:flutter_lab/widgets/band_cell_widget.dart';
 import 'package:flutter_lab/data/models/band/band_model.dart';
-import 'package:flutter_lab/widgets/filter_list_widget.dart';
+import 'package:flutter_lab/widgets/filter_widget.dart';
 
 class BandHomeScreen extends StatefulWidget {
   const BandHomeScreen({super.key});
@@ -57,6 +56,7 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
       body: Column(
         children: [
           FutureBuilder(
+            //show filter
             future: bandModel,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -69,7 +69,7 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
                           i < snapshot.data!.filterModel.filterList.length;
                           i++)
                         FilterWidget(
-                          title: domain.getFilterTitle(i) /* filter.title */,
+                          title: domain.getFilterTitle(i),
                           filterItemList: snapshot
                               .data!.filterModel.filterList[i].filterItemList,
                         ),
@@ -89,15 +89,17 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Expanded(
-                  child: createGridView(domain.getCellList()),
+                  //show gridview
+                  child: createBandHomeGridView(domain.getCellList()),
                 );
               } else {
                 return Expanded(
+                  // show progress
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Center(
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(), //show progress
                       ),
                     ],
                   ),
@@ -110,74 +112,32 @@ class _BandHomeScreenState extends State<BandHomeScreen> {
     );
   }
 
-  GridView createGridView(List<CellModel> cells) {
+  GridView createBandHomeGridView(List<CellModel> bandCellList) {
     int nextPageThreshold = 3;
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: (1 / 1.48),
       ),
-      itemCount: cells.length,
+      itemCount: bandCellList.length,
       itemBuilder: (context, index) {
         if (domain.getCellList().isNotEmpty) {
+          // fetch more
           nextPageThreshold = domain.getCellList().length - 3;
 
           if (index == nextPageThreshold && !domain.isLast()) {
-            print('fetch more band :: offset is ${cells.length}');
-            fetchBands(cells.length);
+            //print('fetch more band :: offset is ${cells.length}');
+            fetchBands(bandCellList.length);
           }
         }
 
-        CellModel cell = cells[index];
-        return Cell(
-          thumbnail: cell.thumbnail,
-          alt: cell.alt,
+        //add cell widget
+        return BandCellWidget(
+          thumbnail: bandCellList[index].thumbnail,
+          alt: bandCellList[index].alt,
           deeplink: "",
         );
       },
-    );
-  }
-}
-
-class FilterWidget extends StatelessWidget {
-  final String title;
-  final List<FilterItemModel> filterItemList;
-
-  const FilterWidget(
-      {super.key, required this.title, required this.filterItemList});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        showGeneralDialog(
-          barrierDismissible: false,
-          context: context,
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return FilterListWidget(
-              currentTitle: title,
-              filterItemList: filterItemList,
-            );
-          },
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.displayMedium!.color,
-              ),
-            ),
-            const Icon(
-              Icons.keyboard_arrow_down_outlined,
-              color: Colors.white,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

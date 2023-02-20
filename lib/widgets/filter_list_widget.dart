@@ -14,7 +14,7 @@ class FilterListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.7),
+      backgroundColor: Colors.black.withOpacity(0.8),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         elevation: 0,
@@ -51,27 +51,6 @@ class FilterListWidget extends StatelessWidget {
             ),
           ),
         ),
-        /* child: Padding(
-          padding: const EdgeInsets.all(50.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  for (var filterItem in filterItemList)
-                    FilterItemTextWidget(
-                      isSelected:
-                          currentTitle.compareTo(filterItem.title) == 0,
-                      filterItem: filterItem,
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ), */
       ),
     );
   }
@@ -91,15 +70,18 @@ class FilterItemTextWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          filterItem.title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey,
-            fontSize: isSelected ? 24 : 18,
+        InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Text(
+              filterItem.title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.grey,
+                fontSize: isSelected ? 24 : 18,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(
-          height: 10,
         ),
       ],
     );
